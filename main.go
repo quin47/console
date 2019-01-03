@@ -1,38 +1,24 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/GeertJohan/go.rice"
+	"github.com/labstack/echo"
 	"net/http"
 )
 
-func main()  {
+func main() {
 
-	router := gin.Default()
+	e := echo.New()
+	// the file server for rice. "public" is the folder where the files come from.
+	assetHandler := http.FileServer(rice.MustFindBox("public").HTTPBox())
+	// serves the index.html from rice
+	e.GET("/", echo.WrapHandler(assetHandler))
 
-	router.Use(gin.Logger())
-
-	// Recovery middleware recovers from any panics and writes a 500 if there was one.
-	router.Use(gin.Recovery())
-
-	//server front resource
-	router.StaticFile("/web","./public/index.html")
-
-	router.Static("/static","./public/static")
-
-	//api
-	api := router.Group("/api")
-	api.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
+	// servers other static files
+	e.GET("/static/*", echo.WrapHandler(assetHandler))
+	e.GET("/ping", func(c echo.Context) error {
+		return c.String(200, "pong")
 	})
 
-	//redirect to web just for now
-	router.GET("/", func(c *gin.Context) {
-		c.Redirect(http.StatusMovedPermanently, "/web")
-	})
-
-
-	router.Run(":8000")
+	e.Logger.Fatal(e.Start(":1323"))
 }
-
