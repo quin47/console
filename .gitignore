@@ -7,3 +7,5 @@
 *.iml
 public
 web/node_modules
+rice-box.go
+console*
