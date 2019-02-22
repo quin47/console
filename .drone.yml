@@ -9,5 +9,5 @@ steps:
 - name: test
   image: golang
   commands:
-  - go mod ensure 
+  - go get
   - go test
